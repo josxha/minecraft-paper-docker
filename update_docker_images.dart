@@ -122,6 +122,5 @@ Future<List<String>> getDockerImageTags() async {
 
 Future<List<String>> getMinecraftVersions() async {
   var response = await get(Uri.parse(PAPER_API));
-  var versions = jsonDecode(response.body)["versions"];
-  return versions;
+  return jsonDecode(response.body)["versions"] as List<String>;
 }
