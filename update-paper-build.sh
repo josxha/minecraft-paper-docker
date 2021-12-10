@@ -9,7 +9,7 @@ latestPaperBuild=$(curl -s https://papermc.io/api/v2/projects/paper/versions/${l
 
 jarName=$(curl -s https://papermc.io/api/v2/projects/paper/versions/${latestMinecraftVersion}/builds/${latestPaperBuild} | jq -r '.downloads.application.name')
 
-if [[ " ${imageTags[*]} " =~ ${latestMinecraftVersion}-${latestPaperBuild} ]]; then
+if [[ " ${imageTags[*]} " =~ ${latestMinecraftVersion}-${latestPaperBuild} ]] && [[ $1 != 'force' ]]; then
   echo Already newest paper patch.
   exit 0
 fi
