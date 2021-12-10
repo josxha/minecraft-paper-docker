@@ -21,7 +21,7 @@ This repository checks automatically every hour for new paper server builds, bui
 version: '3'
 services:
     minecraft:
-        image: josxha/minecraft-paper:1.18
+        image: josxha/minecraft-paper:latest # or e.g. 1.18.1
         container_name: minecraft
         restart: unless-stopped
         ports:

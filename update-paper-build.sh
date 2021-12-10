@@ -18,6 +18,11 @@ fi
 curl -s -o paper.jar https://papermc.io/api/v2/projects/paper/versions/${latestMinecraftVersion}/builds/${latestPaperBuild}/downloads/${jarName}
 
 # build and push images
-docker build . --tag josxha/minecraft-paper:$latestMinecraftVersion-$latestPaperBuild --tag josxha/minecraft-paper:$latestMinecraftVersion
+docker build . \
+  --tag josxha/minecraft-paper:$latestMinecraftVersion-$latestPaperBuild \
+  --tag josxha/minecraft-paper:$latestMinecraftVersion \
+  --tag josxha/minecraft-paper:latest
+
 docker push josxha/minecraft-paper:$latestMinecraftVersion
 docker push josxha/minecraft-paper:$latestMinecraftVersion-$latestPaperBuild
+docker push josxha/minecraft-paper:latest
