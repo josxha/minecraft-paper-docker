@@ -16,12 +16,12 @@ main(List<String> args) async {
 
     // get paper build ids for the minecraft version
     var paperBuilds = await getPaperBuilds(minecraftVersion);
-    paperBuilds.reversed.forEach((paperBuild) async {
+    for(var paperBuild in paperBuilds.reversed) {
       print("[$minecraftVersion] Check if an docker image exists for the paper build $paperBuild...");
       if (dockerImageTags.contains(paperBuild) && args[1] != 'force') {
         // image already exists
         print("Image $minecraftVersion-$paperBuild exists.");
-        return;
+        continue;
       }
 
       // image doesn't exist yet
@@ -36,30 +36,33 @@ main(List<String> args) async {
           // latest minecraft version, latest paper build
           tags.addAll([minecraftVersion, "latest"]);
           if (versionIsHighestSubversion(minecraftVersion, minecraftVersions))
-            tags.add("$minecraftVersion-latest");
+            tags.add("${getMajorVersion(minecraftVersion)}-latest");
         }
       } else {
         if (paperBuild == paperBuilds.last) {
           // not latest minecraft version, latest paper build
           tags.add(minecraftVersion);
           if (versionIsHighestSubversion(minecraftVersion, minecraftVersions))
-            tags.add("$minecraftVersion-latest");
+            tags.add("${getMajorVersion(minecraftVersion)}-latest");
         }
       }
       await dockerBuildAndPush(tags);
       print("Built $minecraftVersion-$paperBuild!");
-    });
+    }
   }
+}
+
+String getMajorVersion(String version) {
+  var list = version.split(RegExp("[\.-]")); // split at . or -
+  return list[0] + "." + list[1];
 }
 
 bool versionIsHighestSubversion(String version, List<String> allVersions) {
   bool indexOfVersionReached = false;
-  var versionList = version.split(RegExp("[\.-]")); // split at . or -
+  var majorVersion = getMajorVersion(version);
   for (var tmpVersion in allVersions) {
-    var tmpVersionList = tmpVersion.split(RegExp("[\.-]")); // split at . or -
-
     // check if other mayor version
-    if (versionList[0] != tmpVersionList[0] || versionList[1] != tmpVersionList[1]) {
+    if (getMajorVersion(tmpVersion) == majorVersion) {
       continue;
     }
     if (indexOfVersionReached)
