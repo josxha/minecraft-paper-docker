@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart';
 
-const PAPER_API = "https://papermc.io/api/v2/projects/paper2";
+const PAPER_API = "https://papermc.io/api/v2/projects/paper";
 const DOCKER_TAG_API = "https://hub.docker.com/v2/repositories/josxha/minecraft-paper/tags/";
 
 
