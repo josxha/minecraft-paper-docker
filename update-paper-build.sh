@@ -2,7 +2,7 @@
 
 latestMinecraftVersion=$(curl -s https://papermc.io/api/v2/projects/paper | jq -r '.versions[]' | tail -n 1)
 
-imageTags=$(curl -s https://hub.docker.com/v2/repositories/marctv/minecraft-papermc-server/tags/ | jq -c '.results[]' | xargs -0 -n1 echo | jq -r '.name')
+imageTags=$(curl -s https://hub.docker.com/v2/repositories/josxha/minecraft-paper/tags/ | jq -c '.results[]' | xargs -0 -n1 echo | jq -r '.name')
 
 # get paper build ids
 latestPaperBuild=$(curl -s https://papermc.io/api/v2/projects/paper/versions/${latestMinecraftVersion} | jq -r '.builds[]' | tail -n 1)
