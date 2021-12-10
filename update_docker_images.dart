@@ -73,6 +73,8 @@ bool versionIsHighestSubversion(String version, List<String> allVersions) {
 
 Future<void> dockerBuildAndPush(List<String> tags) async {
   var buildResult = await dockerBuild(tags);
+  print(buildResult.stdout);
+  print(buildResult.stderr);
   if (buildResult.exitCode != 0)
     throw Exception("Couldn't run docker build for $tags.");
   var futures = tags.map((tag) => dockerPush(tag)).toList();
