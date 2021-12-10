@@ -4,7 +4,7 @@ This repository checks automatically every hour for new paper server builds, bui
 
 ## Links
 - Images: [hub.docker.com/r/josxha/minecraft-paper](https://hub.docker.com/r/josxha/minecraft-paper)
-- Repo: [github.com/josxha/Docker-Minecraft-PaperMC-Server](https://github.com/josxha/Docker-Minecraft-PaperMC-Server)
+- Repository: [github.com/josxha/minecraft-paper-docker](https://github.com/josxha/minecraft-paper-docker)
 - Papermc: [papermc.io/downloads](https://papermc.io/downloads)
 
 ## Why to use this image
@@ -35,7 +35,12 @@ services:
 4. Run `docker-compose up -d` in the directory of your `docker-compose.yml` file.
 5. (optional) Use [watchtower](https://hub.docker.com/r/containrrr/watchtower) to keep your container up to date with the latest image build automatically.
 
+## Image Tags
+- **latest**: Newest minecraft version with the latest paper build
+- **1.17.1**, **1.18**, **1.18.1** or any other minecraft version for the latest paper build of this minecraft version
+- **<minecraft_version>-<paper_build>** to use specific paper build
+
+See all the available tag [here](https://hub.docker.com/r/josxha/minecraft-paper/tags).
+
 ## To Do
-- build new image if there is a new openjdk patch
 - don't run the server as root
-- build images for old minecraft versions
