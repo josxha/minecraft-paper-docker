@@ -1,6 +1,7 @@
 name: Update Paper Build
 
 on:
+  push:
   schedule:
     - cron: "0 * * * *"
 
