@@ -86,7 +86,7 @@ Future<void> dockerBuildAndPush(List<String> tags) async {
 }
 
 Future<ProcessResult> dockerBuild(List<String> tags) async {
-  var args = ["docker", "."];
+  var args = ["docker", "build", "."];
   tags.forEach((String tag) {
     args.addAll([
       "--tag",
