@@ -72,20 +72,19 @@ bool versionIsHighestSubversion(String version, List<String> allVersions) {
 }
 
 Future<void> dockerBuildAndPush(List<String> tags) async {
-  var buildResult = await dockerBuild(tags);
+  var buildResult = dockerBuild(tags);
   print(buildResult.stdout);
   print(buildResult.stderr);
   if (buildResult.exitCode != 0)
     throw Exception("Couldn't run docker build for $tags.");
-  var futures = tags.map((tag) => dockerPush(tag)).toList();
-  var pushResults = await Future.wait(futures);
-  pushResults.forEach((pushResult) {
+  for (var tag in tags) {
+    var pushResult = dockerPush(tag);
     if (pushResult.exitCode != 0)
       throw Exception("Couldn't run docker push for $tags.");
-  });
+  }
 }
 
-Future<ProcessResult> dockerBuild(List<String> tags) async {
+ProcessResult dockerBuild(List<String> tags) {
   var args = ["build", "."];
   tags.forEach((String tag) {
     args.addAll([
@@ -93,11 +92,11 @@ Future<ProcessResult> dockerBuild(List<String> tags) async {
       "josxha/minecraft-paper:$tag",
     ]);
   });
-  return Process.run("docker", args);
+  return Process.runSync("docker", args);
 }
 
-Future<ProcessResult> dockerPush(String tag) async {
-  return Process.run("docker", [
+ProcessResult dockerPush(String tag) {
+  return Process.runSync("docker", [
     "push",
     "josxha/minecraft-paper:$tag",
   ]);
