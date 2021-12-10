@@ -13,4 +13,8 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - run: bash update-paper-build.sh force
+      - uses: dart-lang/setup-dart@v1
+      - name: Install dart dependencies
+        run: dart pub get
+      - name: Update Docker Images
+        run: dart update_docker_images.dart force

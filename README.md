@@ -37,7 +37,8 @@ services:
 
 ## Image Tags
 - **latest**: Newest minecraft version with the latest paper build
-- **1.17.1**, **1.18**, **1.18.1** or any other minecraft version for the latest paper build of this minecraft version
+- **1.18-latest**, **1.17-latest**, **etc.** for the latest paper build of this major minecraft version
+- **1.18.1**, **1.18**, **1.17.1**, **etc.** for the latest paper build of this minecraft version
 - **<minecraft_version>-<paper_build>** to use specific paper build
 
 See all the available tag [here](https://hub.docker.com/r/josxha/minecraft-paper/tags).
