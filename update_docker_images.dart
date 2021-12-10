@@ -107,10 +107,10 @@ Future<String> getJarName(minecraftVersion, paperBuild) async {
   return json["downloads"]["application"]["name"];
 }
 
-Future<List<String>> getPaperBuilds(minecraftVersion) async {
+Future<List<int>> getPaperBuilds(minecraftVersion) async {
   var response = await get(Uri.parse("$PAPER_API/versions/$minecraftVersion"));
   List builds = jsonDecode(response.body)["builds"];
-  return builds.cast<String>();
+  return builds.cast<int>();
 }
 
 Future<List<String>> getDockerImageTags() async {
