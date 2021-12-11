@@ -28,12 +28,17 @@ services:
             - 0.0.0.0:25565:25565
         volumes:
             - ./data:/data:rw
+        # user: 25565:25565
         environment:
             - TZ=Europe/London
             - RAM=4G
 ```
-4. Run `docker-compose up -d` in the directory of your `docker-compose.yml` file.
-5. (optional) Use [watchtower](https://hub.docker.com/r/containrrr/watchtower) to keep your container up to date with the latest image build automatically.
+4. (optional) If you want to run the container not as root
+   1. uncomment the line `user: 25565:25565`
+   2. create the data directory with `mkdir ./data`
+   3. change the directory permissions with `sudo chown 25565:25565 ./data`
+5. Run `docker-compose up -d` in the directory of your `docker-compose.yml` file.
+6. (optional) Use [watchtower](https://hub.docker.com/r/containrrr/watchtower) to keep your container up to date with the latest image build automatically.
 
 ## Image Tags
 - **latest**: Newest minecraft version with the latest paper build
@@ -42,6 +47,3 @@ services:
 - **<minecraft_version>-<paper_build>** to use specific paper build
 
 See all the available tag [here](https://hub.docker.com/r/josxha/minecraft-paper/tags).
-
-## To Do
-- don't run the server as root
