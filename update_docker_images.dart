@@ -12,22 +12,26 @@ main(List<String> args) async {
   var dockerImageTags = await getDockerImageTags();
 
   for (var minecraftVersion in minecraftVersions) {
-    print("Check for Minecraft version $minecraftVersion");
+    print("[$minecraftVersion] Checking updates for minecraft version");
 
     // get paper build ids for the minecraft version
     var paperBuilds = await getPaperBuilds(minecraftVersion);
     int counter = 0;
     for(var paperBuild in paperBuilds.reversed) {
-      print("[$minecraftVersion] Check if an docker image exists for the paper build $paperBuild...");
-      if (dockerImageTags.contains("$minecraftVersion-$paperBuild") && !(args.length >= 1 && args[1] == 'force')) {
+      print("[$minecraftVersion-$paperBuild] Check if an docker image exists for the paper build ...");
+      if (dockerImageTags.contains("$minecraftVersion-$paperBuild")) {
         // image already exists
-        print("Image $minecraftVersion-$paperBuild exists.");
-        continue;
+        if (args.length == 1 || args[1] != 'force') {
+          print("[$minecraftVersion-$paperBuild] Image exists but force update enabled.");
+        } else {
+          print("[$minecraftVersion-$paperBuild] Image exists, skip build.");
+          continue;
+        }
       }
 
       // image doesn't exist yet
       // download paper build
-      print("Build and push image for $minecraftVersion-$paperBuild");
+      print("[$minecraftVersion-$paperBuild] Build and push image");
       var jarName = await getJarName(minecraftVersion, paperBuild);
       var response = await get(Uri.parse("$PAPER_API/versions/$minecraftVersion/builds/$paperBuild/downloads/$jarName"));
       await File("paper.jar").writeAsBytes(response.bodyBytes, mode: FileMode.write);
@@ -47,8 +51,8 @@ main(List<String> args) async {
             tags.add("${getMajorVersion(minecraftVersion)}-latest");
         }
       }
-      await dockerBuildAndPush(tags);
-      print("Built $minecraftVersion-$paperBuild!");
+      await dockerBuildPushRemove(tags);
+      print("[$minecraftVersion-$paperBuild] Built, pushed and cleaned up successfully!");
       counter++;
       if (counter >= 5) {
         break;
@@ -79,19 +83,26 @@ bool versionIsHighestSubversion(String version, List<String> allVersions) {
   return true;
 }
 
-Future<void> dockerBuildAndPush(List<String> tags) async {
-  var buildResult = dockerBuild(tags);
-  print(buildResult.stdout);
-  print(buildResult.stderr);
-  if (buildResult.exitCode != 0)
+Future<void> dockerBuildPushRemove(List<String> tags) async {
+  var taskResult = dockerBuild(tags);
+  if (taskResult.exitCode != 0) {
+    print(taskResult.stdout);
+    print(taskResult.stderr);
     throw Exception("Couldn't run docker build for $tags.");
+  }
   for (var tag in tags) {
-    var pushResult = dockerPush(tag);
-    if (pushResult.exitCode != 0)
+    taskResult = dockerPush(tag);
+    if (taskResult.exitCode != 0) {
+      print(taskResult.stdout);
+      print(taskResult.stderr);
       throw Exception("Couldn't run docker push for $tag.");
-    var removeResult = dockerRemove(tag);
-    if (removeResult.exitCode != 0)
+    }
+    taskResult = dockerRemove(tag);
+    if (taskResult.exitCode != 0) {
+      print(taskResult.stdout);
+      print(taskResult.stderr);
       throw Exception("Couldn't run docker remove image for $tag.");
+    }
   }
 }
 
