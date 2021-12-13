@@ -9,7 +9,6 @@ main(List<String> args) async {
   var minecraftVersions = await getMinecraftVersions();
 
   var dockerImageTags = await getDockerImageTags();
-  print(dockerImageTags);
 
   for (var minecraftVersion in minecraftVersions) {
     print("[$minecraftVersion] Checking updates for minecraft version");
