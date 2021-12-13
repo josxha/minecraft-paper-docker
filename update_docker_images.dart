@@ -19,7 +19,7 @@ main(List<String> args) async {
     int counter = 0;
     for(var paperBuild in paperBuilds.reversed) {
       print("[$minecraftVersion] Check if an docker image exists for the paper build $paperBuild...");
-      if (dockerImageTags.contains(paperBuild) && !(args.length >= 1 && args[1] == 'force')) {
+      if (dockerImageTags.contains("$minecraftVersion-$paperBuild") && !(args.length >= 1 && args[1] == 'force')) {
         // image already exists
         print("Image $minecraftVersion-$paperBuild exists.");
         continue;
