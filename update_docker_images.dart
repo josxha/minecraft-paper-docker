@@ -16,6 +16,7 @@ main(List<String> args) async {
 
     // get paper build ids for the minecraft version
     var paperBuilds = await getPaperBuilds(minecraftVersion);
+    int counter = 0;
     for(var paperBuild in paperBuilds.reversed) {
       print("[$minecraftVersion] Check if an docker image exists for the paper build $paperBuild...");
       if (dockerImageTags.contains(paperBuild) && args[1] != 'force') {
@@ -48,6 +49,10 @@ main(List<String> args) async {
       }
       await dockerBuildAndPush(tags);
       print("Built $minecraftVersion-$paperBuild!");
+      counter++;
+      if (counter > 5) {
+        break;
+      }
     }
   }
 }
@@ -83,7 +88,10 @@ Future<void> dockerBuildAndPush(List<String> tags) async {
   for (var tag in tags) {
     var pushResult = dockerPush(tag);
     if (pushResult.exitCode != 0)
-      throw Exception("Couldn't run docker push for $tags.");
+      throw Exception("Couldn't run docker push for $tag.");
+    var removeResult = dockerRemove(tag);
+    if (removeResult.exitCode != 0)
+      throw Exception("Couldn't run docker remove image for $tag.");
   }
 }
 
@@ -96,6 +104,13 @@ ProcessResult dockerBuild(List<String> tags) {
     ]);
   });
   return Process.runSync("docker", args);
+}
+
+ProcessResult dockerRemove(String tag) {
+  return Process.runSync("docker", [
+    "rmi",
+    "josxha/minecraft-paper:$tag",
+  ]);
 }
 
 ProcessResult dockerPush(String tag) {
