@@ -3,13 +3,13 @@ import 'dart:io';
 import 'package:http/http.dart';
 
 const PAPER_API = "https://papermc.io/api/v2/projects/paper";
-const DOCKER_TAG_API = "https://hub.docker.com/v2/repositories/josxha/minecraft-paper/tags/";
-
+const DOCKER_TAG_API = "https://registry.hub.docker.com/v1/repositories/josxha/minecraft-paper/tags";
 
 main(List<String> args) async {
   var minecraftVersions = await getMinecraftVersions();
 
   var dockerImageTags = await getDockerImageTags();
+  print(dockerImageTags);
 
   for (var minecraftVersion in minecraftVersions) {
     print("[$minecraftVersion] Checking updates for minecraft version");
@@ -18,10 +18,14 @@ main(List<String> args) async {
     var paperBuilds = await getPaperBuilds(minecraftVersion);
     int counter = 0;
     for(var paperBuild in paperBuilds.reversed) {
+      if (counter++ >= 5) {
+        print("[$minecraftVersion] Maximum amount of recent builds for this minecraft version reached.");
+        break;
+      }
       print("[$minecraftVersion-$paperBuild] Check if an docker image exists for the paper build ...");
       if (dockerImageTags.contains("$minecraftVersion-$paperBuild")) {
         // image already exists
-        if (args.length == 1 || args[1] != 'force') {
+        if (args.length >= 1 && args[0] == 'force') {
           print("[$minecraftVersion-$paperBuild] Image exists but force update enabled.");
         } else {
           print("[$minecraftVersion-$paperBuild] Image exists, skip build.");
@@ -53,10 +57,6 @@ main(List<String> args) async {
       }
       await dockerBuildPushRemove(tags);
       print("[$minecraftVersion-$paperBuild] Built, pushed and cleaned up successfully!");
-      counter++;
-      if (counter >= 5) {
-        break;
-      }
     }
   }
 }
@@ -145,8 +145,7 @@ Future<List<int>> getPaperBuilds(minecraftVersion) async {
 
 Future<List<String>> getDockerImageTags() async {
   var response = await get(Uri.parse(DOCKER_TAG_API));
-  var json = jsonDecode(response.body);
-  var jsonList = json["results"] as List;
+  var jsonList = jsonDecode(response.body) as List;
   return jsonList.map((listElement) => listElement["name"] as String).toList();
 }
 
