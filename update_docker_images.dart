@@ -52,8 +52,13 @@ main(List<String> args) async {
       // download paper build
       print("[$minecraftVersion-$paperBuild] Build and push image");
       var jarName = await getJarName(minecraftVersion, paperBuild);
-      var response = await get(Uri.parse("$PAPER_API/versions/$minecraftVersion/builds/$paperBuild/downloads/$jarName"));
-      await File("paper.jar").writeAsBytes(response.bodyBytes, mode: FileMode.write);
+      if (DRY_RUN) {
+        //var response = await get(Uri.parse("$PAPER_API/versions/$minecraftVersion/builds/$paperBuild/downloads/$jarName"));
+        await File("paper.jar").writeAsString("Dry run by the dev branch. Not the real downloaded jar file.", mode: FileMode.write);
+      } else {
+        var response = await get(Uri.parse("$PAPER_API/versions/$minecraftVersion/builds/$paperBuild/downloads/$jarName"));
+        await File("paper.jar").writeAsBytes(response.bodyBytes, mode: FileMode.write);
+      }
       var tags = ["$minecraftVersion-$paperBuild"];
       if (minecraftVersion == minecraftVersions.last) {
         if (paperBuild == paperBuilds.last) {
@@ -141,7 +146,7 @@ ProcessResult dockerRemove(String tag) {
 
 ProcessResult dockerPush(String tag) {
   if (DRY_RUN) {
-    print("Dry run. Skip push to container registry.");
+    return ProcessResult(12345, 0, "Dry run. Skip push to container registry.", "");
   }
   return Process.runSync("docker", [
     "push",
