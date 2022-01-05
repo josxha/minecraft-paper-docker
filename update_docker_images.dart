@@ -14,7 +14,7 @@ main(List<String> args) async {
       case "force":
         FORCE_BUILDS = true;
         break;
-      case "dry_run":
+      case "dry-run":
         DRY_RUN = true;
         break;
       default:
