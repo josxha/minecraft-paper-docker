@@ -5,7 +5,23 @@ import 'package:http/http.dart';
 const PAPER_API = "https://papermc.io/api/v2/projects/paper";
 const DOCKER_TAG_API = "https://registry.hub.docker.com/v1/repositories/josxha/minecraft-paper/tags";
 
+bool DRY_RUN = false;
+bool FORCE_BUILDS = false;
+
 main(List<String> args) async {
+  for (var arg in args) {
+    switch (arg) {
+      case "force":
+        FORCE_BUILDS = true;
+        break;
+      case "dry_run":
+        DRY_RUN = true;
+        break;
+      default:
+        throw "Unknown argument: '$arg'";
+    }
+  }
+
   var minecraftVersions = await getMinecraftVersions();
 
   var dockerImageTags = await getDockerImageTags();
@@ -24,7 +40,7 @@ main(List<String> args) async {
       print("[$minecraftVersion-$paperBuild] Check if an docker image exists for the paper build ...");
       if (dockerImageTags.contains("$minecraftVersion-$paperBuild")) {
         // image already exists
-        if (args.length >= 1 && args[0] == 'force') {
+        if (FORCE_BUILDS) {
           print("[$minecraftVersion-$paperBuild] Image exists but force update enabled.");
         } else {
           print("[$minecraftVersion-$paperBuild] Image exists, skip build.");
@@ -124,6 +140,9 @@ ProcessResult dockerRemove(String tag) {
 }
 
 ProcessResult dockerPush(String tag) {
+  if (DRY_RUN) {
+    print("Dry run. Skip push to container registry.");
+  }
   return Process.runSync("docker", [
     "push",
     "josxha/minecraft-paper:$tag",
