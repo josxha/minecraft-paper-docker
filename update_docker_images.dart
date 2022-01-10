@@ -5,7 +5,23 @@ import 'package:http/http.dart';
 const PAPER_API = "https://papermc.io/api/v2/projects/paper";
 const DOCKER_TAG_API = "https://registry.hub.docker.com/v1/repositories/josxha/minecraft-paper/tags";
 
+bool DRY_RUN = false;
+bool FORCE_BUILDS = false;
+
 main(List<String> args) async {
+  for (var arg in args) {
+    switch (arg) {
+      case "force":
+        FORCE_BUILDS = true;
+        break;
+      case "dry-run":
+        DRY_RUN = true;
+        break;
+      default:
+        throw "Unknown argument: '$arg'";
+    }
+  }
+
   var minecraftVersions = await getMinecraftVersions();
 
   var dockerImageTags = await getDockerImageTags();
@@ -24,7 +40,7 @@ main(List<String> args) async {
       print("[$minecraftVersion-$paperBuild] Check if an docker image exists for the paper build ...");
       if (dockerImageTags.contains("$minecraftVersion-$paperBuild")) {
         // image already exists
-        if (args.length >= 1 && args[0] == 'force') {
+        if (FORCE_BUILDS) {
           print("[$minecraftVersion-$paperBuild] Image exists but force update enabled.");
         } else {
           print("[$minecraftVersion-$paperBuild] Image exists, skip build.");
@@ -36,8 +52,13 @@ main(List<String> args) async {
       // download paper build
       print("[$minecraftVersion-$paperBuild] Build and push image");
       var jarName = await getJarName(minecraftVersion, paperBuild);
-      var response = await get(Uri.parse("$PAPER_API/versions/$minecraftVersion/builds/$paperBuild/downloads/$jarName"));
-      await File("paper.jar").writeAsBytes(response.bodyBytes, mode: FileMode.write);
+      if (DRY_RUN) {
+        //var response = await get(Uri.parse("$PAPER_API/versions/$minecraftVersion/builds/$paperBuild/downloads/$jarName"));
+        await File("paper.jar").writeAsString("Dry run by the dev branch. Not the real downloaded jar file.", mode: FileMode.write);
+      } else {
+        var response = await get(Uri.parse("$PAPER_API/versions/$minecraftVersion/builds/$paperBuild/downloads/$jarName"));
+        await File("paper.jar").writeAsBytes(response.bodyBytes, mode: FileMode.write);
+      }
       var tags = ["$minecraftVersion-$paperBuild"];
       if (minecraftVersion == minecraftVersions.last) {
         if (paperBuild == paperBuilds.last) {
@@ -83,51 +104,25 @@ bool versionIsHighestSubversion(String version, List<String> allVersions) {
 }
 
 Future<void> dockerBuildPushRemove(List<String> tags) async {
-  var taskResult = dockerBuild(tags);
-  if (taskResult.exitCode != 0) {
-    print(taskResult.stdout);
-    print(taskResult.stderr);
-    throw Exception("Couldn't run docker build for $tags.");
-  }
-  for (var tag in tags) {
-    taskResult = dockerPush(tag);
-    if (taskResult.exitCode != 0) {
-      print(taskResult.stdout);
-      print(taskResult.stderr);
-      throw Exception("Couldn't run docker push for $tag.");
-    }
-    taskResult = dockerRemove(tag);
-    if (taskResult.exitCode != 0) {
-      print(taskResult.stdout);
-      print(taskResult.stderr);
-      throw Exception("Couldn't run docker remove image for $tag.");
-    }
-  }
-}
-
-ProcessResult dockerBuild(List<String> tags) {
-  var args = ["build", "."];
+  var args = [
+    "buildx", "build", ".",
+    "--push",
+    "--platform", "arm64", "amd64",
+  ];
   tags.forEach((String tag) {
     args.addAll([
       "--tag",
       "josxha/minecraft-paper:$tag",
     ]);
   });
-  return Process.runSync("docker", args);
-}
-
-ProcessResult dockerRemove(String tag) {
-  return Process.runSync("docker", [
-    "rmi",
-    "josxha/minecraft-paper:$tag",
-  ]);
-}
-
-ProcessResult dockerPush(String tag) {
-  return Process.runSync("docker", [
-    "push",
-    "josxha/minecraft-paper:$tag",
-  ]);
+  if (DRY_RUN)
+    return;
+  var taskResult = Process.runSync("docker", args);
+  if (taskResult.exitCode != 0) {
+    print(taskResult.stdout);
+    print(taskResult.stderr);
+    throw Exception("Couldn't run docker build for $tags.");
+  }
 }
 
 Future<String> getJarName(minecraftVersion, paperBuild) async {

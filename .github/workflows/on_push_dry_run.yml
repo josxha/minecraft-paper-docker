@@ -1,8 +1,8 @@
-name: On push
+name: On push (dry run)
 
 on:
   push:
-    branches: [ main ]
+    branches: [ dev ]
 
 jobs:
   build:
@@ -22,4 +22,4 @@ jobs:
       - name: Install dart dependencies
         run: dart pub get
       - name: Update Docker Images
-        run: dart update_docker_images.dart force
+        run: dart update_docker_images.dart force dry-run
