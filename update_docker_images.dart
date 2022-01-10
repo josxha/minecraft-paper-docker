@@ -33,7 +33,7 @@ main(List<String> args) async {
     var paperBuilds = await getPaperBuilds(minecraftVersion);
     int counter = 0;
     for(var paperBuild in paperBuilds.reversed) {
-      if (counter++ >= 5) {
+      if (counter++ >= 1) {
         print("[$minecraftVersion] Maximum amount of recent builds for this minecraft version reached.");
         break;
       }
