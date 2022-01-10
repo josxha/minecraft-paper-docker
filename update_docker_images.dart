@@ -104,54 +104,25 @@ bool versionIsHighestSubversion(String version, List<String> allVersions) {
 }
 
 Future<void> dockerBuildPushRemove(List<String> tags) async {
-  var taskResult = dockerBuild(tags);
-  if (taskResult.exitCode != 0) {
-    print(taskResult.stdout);
-    print(taskResult.stderr);
-    throw Exception("Couldn't run docker build for $tags.");
-  }
-  for (var tag in tags) {
-    taskResult = dockerPush(tag);
-    if (taskResult.exitCode != 0) {
-      print(taskResult.stdout);
-      print(taskResult.stderr);
-      throw Exception("Couldn't run docker push for $tag.");
-    }
-    taskResult = dockerRemove(tag);
-    if (taskResult.exitCode != 0) {
-      print(taskResult.stdout);
-      print(taskResult.stderr);
-      throw Exception("Couldn't run docker remove image for $tag.");
-    }
-  }
-}
-
-ProcessResult dockerBuild(List<String> tags) {
-  var args = ["build", "."];
+  var args = [
+    "buildx", "build", ".",
+    "--push",
+    "--platform", "arm64", "amd64",
+  ];
   tags.forEach((String tag) {
     args.addAll([
       "--tag",
       "josxha/minecraft-paper:$tag",
     ]);
   });
-  return Process.runSync("docker", args);
-}
-
-ProcessResult dockerRemove(String tag) {
-  return Process.runSync("docker", [
-    "rmi",
-    "josxha/minecraft-paper:$tag",
-  ]);
-}
-
-ProcessResult dockerPush(String tag) {
-  if (DRY_RUN) {
-    return ProcessResult(12345, 0, "Dry run. Skip push to container registry.", "");
+  if (DRY_RUN)
+    return;
+  var taskResult = Process.runSync("docker", args);
+  if (taskResult.exitCode != 0) {
+    print(taskResult.stdout);
+    print(taskResult.stderr);
+    throw Exception("Couldn't run docker build for $tags.");
   }
-  return Process.runSync("docker", [
-    "push",
-    "josxha/minecraft-paper:$tag",
-  ]);
 }
 
 Future<String> getJarName(minecraftVersion, paperBuild) async {
