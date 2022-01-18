@@ -107,7 +107,7 @@ Future<void> dockerBuildPushRemove(List<String> tags) async {
   var args = [
     "buildx", "build", ".",
     "--push",
-    "--platform", "arm64,amd64",
+    "--platform", "linux/arm64,linux/amd64",
   ];
   tags.forEach((String tag) {
     args.addAll([
