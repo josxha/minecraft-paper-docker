@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:http/http.dart';
 
 const PAPER_API = "https://papermc.io/api/v2/projects/paper";
-const DOCKER_TAG_API = "https://registry.hub.docker.com/v2/repositories/josxha/minecraft-paper/tags";
+const DOCKER_TAG_API = "https://registry.hub.docker.com/v2/repositories/josxha/minecraft-paper/tags?page=";
 
 bool DRY_RUN = false;
 bool FORCE_BUILDS = false;
@@ -138,9 +138,20 @@ Future<List<int>> getPaperBuilds(minecraftVersion) async {
 }
 
 Future<List<String>> getDockerImageTags() async {
-  var response = await get(Uri.parse(DOCKER_TAG_API));
-  var jsonList = jsonDecode(response.body)['results'] as List;
-  return jsonList.map((listElement) => listElement["name"] as String).toList();
+  List<String> tags = [];
+  int page = 1;
+  while (true) {
+    var uri = Uri.parse("$DOCKER_TAG_API$page");
+    print(uri);
+    var response = await get(uri);
+    Map<String, dynamic> json = jsonDecode(response.body);
+    List jsonList = json["results"];
+    tags.addAll(jsonList.map((listElement) => listElement["name"] as String).toList());
+    if (json['next'] == null)
+      break;
+    page++;
+  }
+  return tags;
 }
 
 Future<List<String>> getMinecraftVersions() async {
