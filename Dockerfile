@@ -7,6 +7,10 @@ LABEL org.opencontainers.image.source="https://github.com/josxha/minecraft-paper
       org.opencontainers.image.title="Paper Minecraft" \
       org.opencontainers.image.description="Automatic Docker builds for Paper Minecraft"
 
+# dependencies
+# install net-tools for arm64, silence error when under alpine linux
+RUN apt update && apt install net-tools || exit 0
+
 # server jar
 COPY paper.jar /minecraft/
 # entrypoint
