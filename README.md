@@ -21,7 +21,7 @@ This repository checks automatically every hour for new paper server builds, bui
 version: '3'
 services:
     minecraft:
-        image: josxha/minecraft-paper:latest # or e.g. 1.18.1
+        image: josxha/minecraft-paper:latest # or e.g. 1.18.2
         container_name: minecraft
         restart: unless-stopped
         ports:
@@ -43,7 +43,7 @@ services:
 ## Image Tags
 - **latest**: Newest minecraft version with the latest paper build
 - **1.18-latest**, **1.17-latest**, **etc.** for the latest paper build of this major minecraft version
-- **1.18.1**, **1.18**, **1.17.1**, **etc.** for the latest paper build of this minecraft version
+- **1.18.2**, **1.18**, **1.17.1**, **etc.** for the latest paper build of this minecraft version
 - **<minecraft_version>-<paper_build>** to use specific paper build
 
 See all the available tag [here](https://hub.docker.com/r/josxha/minecraft-paper/tags).
