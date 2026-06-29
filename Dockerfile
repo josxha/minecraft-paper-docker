@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:25-jre
 
 LABEL org.opencontainers.image.source="https://github.com/josxha/minecraft-paper-docker" \
       org.opencontainers.image.authors="https://github.com/josxha" \
